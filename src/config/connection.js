@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 
-console.log("Iniciando conexão");
+console.log("Iniciando conexão do backend com o banco de dados");
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || "localhost",
@@ -16,7 +16,7 @@ const pool = mysql.createPool({
 async function testConnection() {
   try {
     const connection = await pool.getConnection();
-    console.log(" banco de dados conectado com sucesso!");
+    console.log(" banco de dados conectado e funcionando!");
     connection.release();
   } catch (error) {
     console.error(" Erro ao conectar com o banco:");

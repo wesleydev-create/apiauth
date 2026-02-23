@@ -126,7 +126,7 @@ Mossoró - RN • Brasil
 
     res.status(201).json({
       success: true,
-      message: "Usuário registrado com sucesso! Email enviado.",
+      message: "Usuário registrado com sucesso! Email de confimação enviado.",
       data: result,
     });
   } catch (error) {
@@ -146,7 +146,7 @@ async function login(req, res) {
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
     res.json({

@@ -1,38 +1,30 @@
 require("dotenv").config();
 const express = require("express");
-const pool = require("./config/connection");
-const authRoutes = require("./routes/auth.routes");
+const pool = require("../config/connection");
+const authRoutes = require("../routes/auth.routes");
 
 const app = express();
-const PORT = process.env.PORT || 8080;
 
-// Middleware para interpretar JSON
 app.use(express.json());
 
-// Rotas de autenticação
 app.use("/api/auth", authRoutes);
 
-// Rota padrão para teste
-app.get("/", (req, res) => {
-  res.json({ success: true, message: "API SmartOdonto rodando!" });
-});
-
-// Função para iniciar servidor e testar conexão com MySQL
-async function startServer() {
+app.get("/", async (req, res) => {
   try {
-    // Testa conexão com o banco
     const connection = await pool.getConnection();
-    console.log("✅ Conexão com MySQL estabelecida!");
-    connection.release(); // libera a conexão
+    connection.release();
 
-    // Inicia servidor
-    app.listen(PORT, () => {
-      console.log(`🚀 Servidor rodando na porta ${PORT}`);
+    return res.json({
+      success: true,
+      message: "API AUTH rodando na Vercel 🚀",
     });
   } catch (error) {
-    console.error("❌ Não foi possível conectar ao MySQL:", error.message);
-    process.exit(1); // encerra o processo se falhar a conexão
+    return res.status(500).json({
+      success: false,
+      error: "Erro ao conectar com o banco",
+      details: error.message,
+    });
   }
-}
+});
 
-startServer();
+module.exports = app;
