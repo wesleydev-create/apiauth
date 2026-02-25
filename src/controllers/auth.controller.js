@@ -1,21 +1,48 @@
 const jwt = require("jsonwebtoken");
+const { cpf } = require("cpf-cnpj-validator");
 const authService = require("../services/auth.service");
 const sendEmail = require("../utils/email");
 
+
+// ============================
+// REGISTER
+// ============================
 async function register(req, res) {
   try {
-    const { email, password } = req.body;
+    const { email, password, confirmPassword, cpf: userCpf } = req.body;
 
-    if (!email || !password) {
+    // 🔎 Validações básicas
+    if (!email || !password || !confirmPassword || !userCpf) {
       return res.status(400).json({
         success: false,
-        message: "Email e senha são obrigatórios",
+        message: "Email, senha, confirmação de senha e CPF são obrigatórios",
       });
     }
 
-    const result = await authService.register(email, password);
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "As senhas não coincidem",
+      });
+    }
 
-const html = `
+    if (!cpf.isValid(userCpf)) {
+      return res.status(400).json({
+        success: false,
+        message: "CPF inválido",
+      });
+    }
+
+    // 🚀 Criar usuário
+    const user = await authService.register({
+      email,
+      password,
+      cpf: userCpf,
+      role: "user",
+    });
+
+    // 📧 Template HTML do email
+    const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -112,54 +139,72 @@ Mossoró - RN • Brasil
 </html>
 `;
 
-    try {
-      await sendEmail({
-        to: email,
-        subject: "Bem-vindo ao SmartOdonto!",
-        html: html,
-      });
+    // 📧 Enviar email (não trava cadastro se falhar)
+    sendEmail({
+      to: email,
+      subject: "Bem-vindo ao SmartOdonto 🎉",
+      html,
+    }).catch((err) =>
+      console.error("❌ Erro ao enviar email:", err.message)
+    );
 
-      console.log(`✅ Email enviado para ${email}`);
-    } catch (err) {
-      console.error("❌ Erro ao enviar email:", err.message);
-    }
-
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "Usuário registrado com sucesso! Email de confimação enviado.",
-      data: result,
+      message: "Usuário registrado com sucesso!",
+      data: user,
     });
+
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
   }
 }
 
+
+// ============================
+// LOGIN
+// ============================
 async function login(req, res) {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email e senha são obrigatórios",
+      });
+    }
+
     const user = await authService.login(email, password);
 
     const token = jwt.sign(
-      { id: user.id, email: user.email },
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    res.json({
+    return res.json({
       success: true,
       message: "Login realizado com sucesso!",
       token,
     });
+
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: error.message,
     });
   }
 }
 
-module.exports = { register, login };
+
+module.exports = {
+  register,
+  login,
+};

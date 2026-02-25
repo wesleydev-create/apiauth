@@ -1,38 +1,53 @@
 const pool = require("../config/connection");
 const bcrypt = require("bcrypt");
 
-async function register(email, password) {
-  if (!email || !password) {
-    throw new Error("Email e senha são obrigatórios");
+async function register({ email, password, cpf, role }) {
+
+  if (!email || !password || !cpf) {
+    throw new Error("Email, senha e CPF são obrigatórios");
   }
 
-  const [existingUser] = await pool.query(
+
+  const [existingEmail] = await pool.query(
     "SELECT id FROM users WHERE email = ?",
     [email]
   );
 
-  if (existingUser.length > 0) {
-    throw new Error("Usuário já existe");
+  if (existingEmail.length > 0) {
+    throw new Error("Email já cadastrado");
+  }
+
+
+  const [existingCpf] = await pool.query(
+    "SELECT id FROM users WHERE cpf = ?",
+    [cpf]
+  );
+
+  if (existingCpf.length > 0) {
+    throw new Error("CPF já cadastrado");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  await pool.query(
-    "INSERT INTO users (email, password) VALUES (?, ?)",
-    [email, hashedPassword]
+  const [result] = await pool.query(
+    "INSERT INTO users (email, password, cpf, role) VALUES (?, ?, ?, ?)",
+    [email, hashedPassword, cpf, role || "user"]
   );
 
-  return { message: "Usuário cadastrado com sucesso" };
+  return {
+    id: result.insertId,
+    email,
+    cpf,
+    role: role || "user"
+  };
 }
 
 
+
 async function login(email, password) {
-  if (!email || !password) {
-    throw new Error("Email e senha são obrigatórios");
-  }
 
   const [rows] = await pool.query(
-    "SELECT id, email, password FROM users WHERE email = ?",
+    "SELECT * FROM users WHERE email = ?",
     [email]
   );
 
@@ -48,12 +63,25 @@ async function login(email, password) {
     throw new Error("Senha inválida");
   }
 
+  if (!user.email_verified) {
+    throw new Error("Confirme seu email antes de fazer login");
+  }
+
   delete user.password;
 
   return user;
 }
 
+
+async function verifyEmail(userId) {
+  await pool.query(
+    "UPDATE users SET email_verified = true WHERE id = ?",
+    [userId]
+  );
+}
+
 module.exports = {
   register,
-  login
+  login,
+  verifyEmail
 };

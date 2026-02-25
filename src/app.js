@@ -1,30 +1,57 @@
 require("dotenv").config();
 const express = require("express");
-const pool = require("../config/connection");
-const authRoutes = require("../routes/auth.routes");
+const cors = require("cors");
+const pool = require("./config/connection");
+const authRoutes = require("./routes/auth.routes");
 
 const app = express();
+const PORT = process.env.PORT || 8080;
 
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "🚀 API SmartOdonto rodando com sucesso!",
+    environment: process.env.NODE_ENV || "development"
+  });
+});
 
 app.use("/api/auth", authRoutes);
 
-app.get("/", async (req, res) => {
-  try {
-    const connection = await pool.getConnection();
-    connection.release();
 
-    return res.json({
-      success: true,
-      message: "API AUTH rodando na Vercel 🚀",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: "Erro ao conectar com o banco",
-      details: error.message,
-    });
-  }
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Rota não encontrada"
+  });
 });
 
-module.exports = app;
+app.use((err, req, res, next) => {
+  console.error("🔥 Erro interno:", err);
+
+  res.status(500).json({
+    success: false,
+    message: "Erro interno do servidor"
+  });
+});
+
+
+async function startServer() {
+  try {
+    await pool.getConnection();
+    console.log("✅ Conexão com MariaDB estabelecida com sucesso!");
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor rodando em: http://localhost:${PORT}`);
+    });
+
+  } catch (error) {
+    console.error("❌ Erro ao conectar com o banco:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();
