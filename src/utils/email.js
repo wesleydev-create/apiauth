@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 
 async function sendEmail({ to, subject, html }) {
   await transporter.sendMail({
-    from: `"SmartOdonto" <${process.env.EMAIL_USER}>`,
+    from: `"SmartSystem" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html

@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "🚀 API SmartOdonto rodando com sucesso!",
+    message: " API rodando com sucesso!",
     environment: process.env.NODE_ENV || "development"
   });
 });
@@ -30,7 +30,8 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  console.error("🔥 Erro interno:", err);
+  console.error(" Erro interno:", err);
+  alert("error interno do servidor")
 
   res.status(500).json({
     success: false,
@@ -42,14 +43,14 @@ app.use((err, req, res, next) => {
 async function startServer() {
   try {
     await pool.getConnection();
-    console.log("✅ Conexão com MariaDB estabelecida com sucesso!");
+    console.log("Conexão com MariaDB estabelecida com sucesso!");
 
     app.listen(PORT, () => {
-      console.log(`🚀 Servidor rodando em: http://localhost:${PORT}`);
+      console.log(` Servidor rodando em: http://localhost:${PORT}`);
     });
 
   } catch (error) {
-    console.error("❌ Erro ao conectar com o banco:", error.message);
+    console.error(" Erro ao conectar com o banco:", error.message);
     process.exit(1);
   }
 }

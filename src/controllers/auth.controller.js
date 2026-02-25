@@ -41,14 +41,14 @@ async function register(req, res) {
       role: "user",
     });
 
-    // 📧 Template HTML do email
+
     const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bem-vindo ao SmartOdonto</title>
+<title>Bem-vindo ao SmartSystem</title>
 </head>
 
 <body style="margin:0; padding:0; background-color:#f3f4f6; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -62,9 +62,9 @@ style="background:#ffffff; border-radius:14px; padding:48px; box-shadow:0 10px 3
 
 <tr>
 <td align="center" style="padding-bottom:30px;">
-<h2 style="margin:0; font-size:22px; color:#111827;">SmartOdonto</h2>
+<h2 style="margin:0; font-size:22px; color:#111827;">SmartSystem</h2>
 <p style="margin:6px 0 0; font-size:14px; color:#6b7280;">
-Plataforma profissional de gestão odontológica
+você se cadastrou no nosso sistema de gestao, Obrigado por automatizar conosco
 </p>
 </td>
 </tr>
@@ -73,7 +73,7 @@ Plataforma profissional de gestão odontológica
 <td style="color:#374151; font-size:16px; line-height:1.7;">
 
 <h1 style="font-size:24px; margin-bottom:20px; color:#111827;">
-Sua conta foi criada com sucesso 🎉
+Sua conta foi criada com sucesso 
 </h1>
 
 <p style="margin:0 0 16px;">
@@ -81,12 +81,12 @@ Olá <strong>${email}</strong>,
 </p>
 
 <p style="margin:0 0 16px;">
-Seja bem-vindo ao <strong>SmartOdonto</strong>.  
+Seja bem-vindo a <strong>SmartSystem</strong>.  
 Sua conta já está ativa e pronta para uso.
 </p>
 
 <p style="margin:0 0 24px;">
-Agora você pode gerenciar pacientes, consultas e finanças de forma moderna, segura e eficiente.
+obrigado por se cadastrar no nosso sistema e fazer parte da familia SmartSystem.
 </p>
 
 </td>
@@ -115,7 +115,7 @@ Acessar minha conta
 <td style="border-top:1px solid #e5e7eb; padding-top:30px; font-size:13px; color:#6b7280; text-align:center;">
 
 <p style="margin:0;">
-Se você não criou essa conta, pode ignorar este email.
+Se você nao criou essa conta pode ignorar o email.
 </p>
 
 <p style="margin:16px 0 0;">
@@ -123,7 +123,7 @@ Se você não criou essa conta, pode ignorar este email.
 </p>
 
 <p style="margin:6px 0 0;">
-Mossoró - RN • Brasil
+natal - RN • Brasil
 </p>
 
 </td>
@@ -139,18 +139,17 @@ Mossoró - RN • Brasil
 </html>
 `;
 
-    // 📧 Enviar email (não trava cadastro se falhar)
     sendEmail({
       to: email,
-      subject: "Bem-vindo ao SmartOdonto 🎉",
+      subject: "Bem-vindo a SmartSystem 🎉",
       html,
     }).catch((err) =>
-      console.error("❌ Erro ao enviar email:", err.message)
+      console.error(" Erro ao enviar email:", err.message)
     );
 
     return res.status(201).json({
       success: true,
-      message: "Usuário registrado com sucesso!",
+      message: "Usuário cadastrado com sucesso!",
       data: user,
     });
 
@@ -163,9 +162,6 @@ Mossoró - RN • Brasil
 }
 
 
-// ============================
-// LOGIN
-// ============================
 async function login(req, res) {
   try {
     const { email, password } = req.body;
